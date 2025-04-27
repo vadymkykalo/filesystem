@@ -53,6 +53,47 @@ You can then execute your native executable with: `./build/filesystem-1.0.0-SNAP
 
 If you want to learn more about building native executables, please consult <https://quarkus.io/guides/gradle-tooling>.
 
+## Filesystem S3 Service
+
+Сервис для загрузки и выгрузки файлов с использованием S3-совместимого хранилища (MinIO).
+
+## Функциональность
+
+- Загрузка файлов в S3 хранилище
+- Получение файлов по ID
+- Удаление файлов
+- Получение списка всех файлов
+- Автоматическое создание бакета при запуске
+
+## Технологии
+
+- Quarkus
+- MinIO (S3-совместимое хранилище)
+- PostgreSQL (для хранения метаданных)
+- jOOQ
+- REST API с документацией OpenAPI
+
+## Запуск приложения
+
+### Подготовка
+
+Для запуска требуется Docker и Docker Compose. Все необходимые сервисы запускаются с помощью команды:
+
+```shell script
+docker-compose up -d
+```
+
+Это запустит:
+- PostgreSQL (порт 5432)
+- MinIO (порты 9000 для API и 9001 для веб-интерфейса)
+
+### Запуск в режиме разработки
+
+```shell script
+./gradlew quarkusDev
+```
+
+
 ## Related Guides
 
 - Minio Client extension ([guide](https://quarkiverse.github.io/quarkiverse-docs/quarkus-minio/dev/index.html)): Integrates MinIO Java SDK for Amazon S3 Compatible Cloud Storage
