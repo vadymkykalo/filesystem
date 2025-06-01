@@ -58,9 +58,9 @@ public class FileResourceController {
         try {
             FileStorageService.FileDownloadResponse downloadResponse = fileStorageService.getFileById(id);
             
-            return Response.ok(downloadResponse.getContent())
-                    .header("Content-Disposition", "attachment; filename=\"" + downloadResponse.getFileName() + "\"")
-                    .header("Content-Type", downloadResponse.getContentType())
+            return Response.ok(downloadResponse.content())
+                    .header("Content-Disposition", "attachment; filename=\"" + downloadResponse.fileName() + "\"")
+                    .header("Content-Type", downloadResponse.contentType())
                     .build();
         } catch (NotFoundException e) {
             return Response.status(Response.Status.NOT_FOUND)

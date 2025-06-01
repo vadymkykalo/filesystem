@@ -124,12 +124,9 @@ public class FileStorageService {
                     .object(id)
                     .build()
             );
-            
-            // Delete metadata from database
             fileRepository.deleteById(id);
         } catch (ErrorResponseException e) {
             if (e.errorResponse().code().equals("NoSuchKey")) {
-                // If file doesn't exist in storage, just remove the database record
                 fileRepository.deleteById(id);
             } else {
                 throw new Exception("Error deleting file: " + e.getMessage(), e);
@@ -147,31 +144,10 @@ public class FileStorageService {
     public List<FileEntity> getAllFiles() {
         return fileRepository.findAll();
     }
-    
-    /**
+
+     /**
      * Container for file download response
      */
-    public static class FileDownloadResponse {
-        private final InputStream content;
-        private final String fileName;
-        private final String contentType;
-        
-        public FileDownloadResponse(InputStream content, String fileName, String contentType) {
-            this.content = content;
-            this.fileName = fileName;
-            this.contentType = contentType;
-        }
-        
-        public InputStream getContent() {
-            return content;
-        }
-        
-        public String getFileName() {
-            return fileName;
-        }
-        
-        public String getContentType() {
-            return contentType;
-        }
+    public record FileDownloadResponse(InputStream content, String fileName, String contentType) {
     }
 }
