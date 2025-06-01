@@ -1,6 +1,6 @@
-package com.peretyn.repository;
+package com.minio.repository;
 
-import com.peretyn.model.FileEntity;
+import com.minio.model.FileEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.jooq.DSLContext;

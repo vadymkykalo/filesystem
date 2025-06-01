@@ -1,4 +1,4 @@
-package com.peretyn.model;
+package com.minio.model;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -20,8 +20,7 @@ public class FileEntity {
         this.fileSize = fileSize;
         this.uploadDate = LocalDateTime.now();
     }
-    
-    // Для создания объекта с уже существующим ID
+
     public FileEntity(String id, String fileName, String contentType, long fileSize, LocalDateTime uploadDate) {
         this.id = id;
         this.fileName = fileName;

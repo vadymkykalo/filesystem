@@ -1,7 +1,7 @@
-package com.peretyn.controller;
+package com.minio.controller;
 
-import com.peretyn.model.FileEntity;
-import com.peretyn.service.FileStorageService;
+import com.minio.model.FileEntity;
+import com.minio.service.FileStorageService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
@@ -87,14 +87,12 @@ public class FileResourceController {
                 schema = @Schema(implementation = FileEntity.class)))
     public Response uploadFile(@MultipartForm FileUploadForm form) {
         try {
-            // Read all bytes from input stream to both determine type and re-use
+
             byte[] fileBytes = form.getFile().readAllBytes();
             String fileName = form.getFileName();
-            
-            // Use Tika to detect the content type from the actual file contents
+
             String contentType = detectContentType(fileBytes, fileName);
-            
-            // Re-create input stream from bytes
+
             InputStream fileInputStream = new ByteArrayInputStream(fileBytes);
             
             FileEntity fileEntity = fileStorageService.uploadFile(fileInputStream, fileName, contentType);
@@ -144,11 +142,10 @@ public class FileResourceController {
             // Use Tika to detect content type from actual bytes
             Tika tika = new Tika();
             String detectedType = tika.detect(fileBytes);
-            
-            // If Tika returns a generic type or octet-stream, try to use the extension
+
             if (detectedType.equals("application/octet-stream") || detectedType.equals("text/plain")) {
                 String extensionType = determineContentTypeFromExtension(fileName);
-                // Only use the extension type if it's more specific
+
                 if (!extensionType.equals(MediaType.APPLICATION_OCTET_STREAM)) {
                     return extensionType;
                 }
@@ -156,7 +153,6 @@ public class FileResourceController {
             
             return detectedType;
         } catch (Exception e) {
-            // Fallback to extension-based detection if Tika fails
             return determineContentTypeFromExtension(fileName);
         }
     }
@@ -177,78 +173,45 @@ public class FileResourceController {
         if (i > 0) {
             extension = fileName.substring(i + 1).toLowerCase();
         }
-        
-        switch (extension) {
+
+        return switch (extension) {
             // Images
-            case "jpg":
-            case "jpeg":
-                return "image/jpeg";
-            case "png":
-                return "image/png";
-            case "gif":
-                return "image/gif";
-            case "bmp":
-                return "image/bmp";
-            case "webp":
-                return "image/webp";
-            case "svg":
-                return "image/svg+xml";
-                
+            case "jpg", "jpeg" -> "image/jpeg";
+            case "png" -> "image/png";
+            case "gif" -> "image/gif";
+            case "bmp" -> "image/bmp";
+            case "webp" -> "image/webp";
+            case "svg" -> "image/svg+xml";
+
             // Documents
-            case "pdf":
-                return "application/pdf";
-            case "doc":
-            case "docx":
-                return "application/msword";
-            case "xls":
-            case "xlsx":
-                return "application/vnd.ms-excel";
-            case "ppt":
-            case "pptx":
-                return "application/vnd.ms-powerpoint";
-            case "txt":
-                return "text/plain";
-            case "html":
-            case "htm":
-                return "text/html";
-            case "xml":
-                return "application/xml";
-            case "json":
-                return "application/json";
-            
+            case "pdf" -> "application/pdf";
+            case "doc", "docx" -> "application/msword";
+            case "xls", "xlsx" -> "application/vnd.ms-excel";
+            case "ppt", "pptx" -> "application/vnd.ms-powerpoint";
+            case "txt" -> "text/plain";
+            case "html", "htm" -> "text/html";
+            case "xml" -> "application/xml";
+            case "json" -> "application/json";
+
             // Audio
-            case "mp3":
-                return "audio/mpeg";
-            case "wav":
-                return "audio/wav";
-            case "ogg":
-                return "audio/ogg";
-            
+            case "mp3" -> "audio/mpeg";
+            case "wav" -> "audio/wav";
+            case "ogg" -> "audio/ogg";
+
             // Video
-            case "mp4":
-                return "video/mp4";
-            case "avi":
-                return "video/x-msvideo";
-            case "webm":
-                return "video/webm";
-            case "mkv":
-                return "video/x-matroska";
-            
+            case "mp4" -> "video/mp4";
+            case "avi" -> "video/x-msvideo";
+            case "webm" -> "video/webm";
+            case "mkv" -> "video/x-matroska";
+
             // Archives
-            case "zip":
-                return "application/zip";
-            case "rar":
-                return "application/x-rar-compressed";
-            case "7z":
-                return "application/x-7z-compressed";
-            case "tar":
-                return "application/x-tar";
-            case "gz":
-                return "application/gzip";
-            
-            default:
-                return MediaType.APPLICATION_OCTET_STREAM;
-        }
+            case "zip" -> "application/zip";
+            case "rar" -> "application/x-rar-compressed";
+            case "7z" -> "application/x-7z-compressed";
+            case "tar" -> "application/x-tar";
+            case "gz" -> "application/gzip";
+            default -> MediaType.APPLICATION_OCTET_STREAM;
+        };
     }
     
     /**

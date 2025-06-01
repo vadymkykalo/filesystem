@@ -1,4 +1,4 @@
-package com.peretyn;
+package com.minio;
 
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;

@@ -1,6 +1,5 @@
-package com.peretyn.config;
+package com.minio.config;
 
-import com.peretyn.repository.FileRepository;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
@@ -23,9 +22,6 @@ public class S3InitializerBean {
     
     @Inject
     MinioClient minioClient;
-    
-    @Inject
-    FileRepository fileRepository;
     
     @ConfigProperty(name = "minio.bucket")
     String bucketName;

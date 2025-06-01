@@ -1,7 +1,7 @@
-package com.peretyn.service;
+package com.minio.service;
 
-import com.peretyn.model.FileEntity;
-import com.peretyn.repository.FileRepository;
+import com.minio.model.FileEntity;
+import com.minio.repository.FileRepository;
 import io.minio.*;
 import io.minio.errors.*;
 import jakarta.enterprise.context.ApplicationScoped;
