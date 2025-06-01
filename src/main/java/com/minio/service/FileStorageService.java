@@ -57,8 +57,7 @@ public class FileStorageService {
                     .stream(new ByteArrayInputStream(bytes), fileSize, -1)
                     .build()
             );
-            
-            // Save metadata to database
+
             fileRepository.save(fileEntity);
             
             return fileEntity;
