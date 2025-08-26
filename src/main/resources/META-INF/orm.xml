@@ -44,33 +44,13 @@
 
     <!-- MarketingTargetFilterCondition queries -->
 
-    <named-query name="MarketingTargetFilterCondition.findByGroupId">
-        <query>
-            SELECT c FROM MarketingTargetFilterCondition c WHERE c.groupId = :groupId ORDER BY c.orderIndex
-        </query>
-    </named-query>
-
     <named-query name="MarketingTargetFilterCondition.deleteByFilterId">
         <query>
             DELETE FROM MarketingTargetFilterCondition c WHERE c.marketingTargetFilterId = :filterId
         </query>
     </named-query>
 
-    <named-query name="MarketingTargetFilterCondition.deleteByGroupId">
-        <query>
-            DELETE FROM MarketingTargetFilterCondition c WHERE c.groupId = :groupId
-        </query>
-    </named-query>
-
     <!-- MarketingTargetFilterGroup queries -->
-
-    <named-query name="MarketingTargetFilterGroup.findByIdWithConditions">
-        <query>
-            SELECT g FROM MarketingTargetFilterGroup g 
-            LEFT JOIN FETCH g.conditions c 
-            WHERE g.id = :id ORDER BY c.orderIndex
-        </query>
-    </named-query>
 
     <named-query name="MarketingTargetFilterGroup.deleteByFilterId">
         <query>
@@ -83,18 +63,6 @@
     <named-query name="MarketingTargetListItem.countByMarketingTargetIdAndSmid">
         <query>
             SELECT COUNT(m) FROM MarketingTargetListItem m WHERE m.marketingTargetId = :marketingTargetId AND m.smid = :smid
-        </query>
-    </named-query>
-
-    <named-query name="MarketingTargetListItem.deleteByMarketingTargetId">
-        <query>
-            DELETE FROM MarketingTargetListItem m WHERE m.marketingTargetId = :marketingTargetId
-        </query>
-    </named-query>
-
-    <named-query name="MarketingTargetListItem.countByMarketingTargetId">
-        <query>
-            SELECT COUNT(m) FROM MarketingTargetListItem m WHERE m.marketingTargetId = :marketingTargetId
         </query>
     </named-query>
 
