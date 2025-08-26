@@ -1,13 +1,26 @@
 package com.minio.model;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Entity
+@Table(name = "files")
 public class FileEntity {
+    @Id
+    @Column(name = "id", length = 36)
     private String id;
+    
+    @Column(name = "file_name", nullable = false)
     private String fileName;
+    
+    @Column(name = "content_type", nullable = false, length = 100)
     private String contentType;
+    
+    @Column(name = "file_size", nullable = false)
     private long fileSize;
+    
+    @Column(name = "upload_date", nullable = false)
     private LocalDateTime uploadDate;
     
     public FileEntity() {

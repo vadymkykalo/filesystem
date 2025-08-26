@@ -10,13 +10,13 @@ repositories {
 
 dependencies {
     implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
-    implementation 'io.quarkiverse.jooq:quarkus-jooq:2.1.0'
+    implementation 'io.quarkus:quarkus-hibernate-orm'
+    implementation 'io.quarkus:quarkus-hibernate-orm-panache'
     implementation 'io.quarkiverse.minio:quarkus-minio:3.8.1'
     implementation 'io.quarkus:quarkus-smallrye-openapi'
     implementation 'io.quarkus:quarkus-resteasy'
     implementation 'io.quarkus:quarkus-resteasy-jackson'
     implementation 'org.jboss.resteasy:resteasy-multipart-provider'
-    implementation 'io.quarkus:quarkus-liquibase'
     implementation 'io.quarkus:quarkus-jdbc-postgresql'
     implementation 'io.quarkus:quarkus-arc'
     implementation 'org.apache.tika:tika-core:2.9.1'
