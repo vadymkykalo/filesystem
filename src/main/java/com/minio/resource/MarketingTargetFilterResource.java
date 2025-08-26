@@ -215,4 +215,24 @@ public class MarketingTargetFilterResource {
                 .build();
         }
     }
+    
+    /**
+     * Validate filter structure
+     */
+    @POST
+    @Path("/validate")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response validateFilterStructure(MarketingTargetFilterDto filterDto) {
+        try {
+            filterService.validateFilterStructure(filterDto);
+            return Response.ok()
+                .entity("{\"valid\": true, \"message\": \"Filter structure is valid\"}")
+                .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("{\"valid\": false, \"message\": \"" + e.getMessage() + "\"}")
+                .build();
+        }
+    }
 }

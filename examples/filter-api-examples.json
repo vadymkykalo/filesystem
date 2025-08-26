@@ -1,13 +1,14 @@
 {
+  "description": "Примеры использования API маркетинговых фильтров после рефакторинга (без flat структуры)",
   "examples": {
-    "createFlatFilter": {
-      "description": "Создание плоского фильтра с условиями как на скриншоте",
+    "createSimpleFilter": {
+      "description": "Создание простого фильтра с условиями на корневом уровне (AND логика)",
       "method": "POST",
-      "url": "/api/marketing-target-filters/flat",
+      "url": "/api/marketing-target-filters",
       "body": {
-        "filterName": "Параметри таргетування_29052025",
+        "filterName": "Простой фильтр условий",
         "marketingTargetId": 1,
-        "description": "Фильтр для таргетирования пользователей",
+        "description": "Фильтр с простыми условиями AND логикой",
         "isActive": true,
         "conditions": [
           {
@@ -17,149 +18,59 @@
             "orderIndex": 0
           },
           {
-            "fieldType": "DISTRIBUTION_GROUPS_FILE",
-            "operator": "EQUAL",
-            "fieldValue": "48b14365-392c-4c83-8d06-324eadc312f3",
-            "orderIndex": 1
-          },
-          {
             "fieldType": "COUNTRY",
             "operator": "NOT_EQUAL",
             "fieldValue": "BY",
-            "orderIndex": 2
+            "orderIndex": 1
           },
           {
             "fieldType": "OPERATING_SYSTEM",
             "operator": "CONTAINS",
             "fieldValue": "IOS",
-            "orderIndex": 3
-          },
-          {
-            "fieldType": "CLIENT_VERSION",
-            "operator": "EQUAL",
-            "fieldValue": "2.238.1",
-            "orderIndex": 4
+            "orderIndex": 2
           }
-        ],
-        "logicExpression": {
-          "root": {
-            "type": "GROUP",
-            "operator": "AND",
-            "children": [
-              {
-                "type": "CONDITION",
-                "conditionIndex": 0
-              },
-              {
-                "type": "CONDITION",
-                "conditionIndex": 1
-              },
-              {
-                "type": "CONDITION",
-                "conditionIndex": 2
-              },
-              {
-                "type": "CONDITION",
-                "conditionIndex": 3
-              },
-              {
-                "type": "CONDITION",
-                "conditionIndex": 4
-              }
-            ]
-          }
-        }
+        ]
       }
     },
-    "updateFlatFilter": {
-      "description": "Обновление плоского фильтра",
-      "method": "PUT",
-      "url": "/api/marketing-target-filters/flat/1",
-      "body": {
-        "filterName": "Обновленный фильтр",
-        "marketingTargetId": 1,
-        "description": "Обновленное описание",
-        "isActive": true,
-        "conditions": [
-          {
-            "fieldType": "BROWSER",
-            "operator": "CONTAINS",
-            "fieldValue": "Google",
-            "orderIndex": 0
-          },
-          {
-            "fieldType": "INTERNET_TYPE",
-            "operator": "EQUAL",
-            "fieldValue": "Wi-Fi",
-            "orderIndex": 1
-          }
-        ],
-        "logicExpression": {
-          "root": {
-            "type": "GROUP",
-            "operator": "OR",
-            "children": [
-              {
-                "type": "CONDITION",
-                "conditionIndex": 0
-              },
-              {
-                "type": "CONDITION",
-                "conditionIndex": 1
-              }
-            ]
-          }
-        }
-      }
-    },
-    "createComplexFilter": {
-      "description": "Создание сложного фильтра с группировкой",
+    "createComplexFilterWithGroups": {
+      "description": "Создание сложного фильтра: (SMID1 OR SMID2) AND COUNTRY=UA AND NOT_IN файл выборки",
       "method": "POST",
       "url": "/api/marketing-target-filters",
       "body": {
         "filterName": "Сложный фильтр с группами",
         "marketingTargetId": 1,
-        "description": "Фильтр с логическими группами",
+        "description": "Фильтр: (SMID1 или SMID2) И страна Украина И НЕ в файле выборки",
         "isActive": true,
+        "conditions": [
+          {
+            "fieldType": "COUNTRY",
+            "operator": "EQUAL",
+            "fieldValue": "UA",
+            "orderIndex": 0
+          },
+          {
+            "fieldType": "DISTRIBUTION_GROUPS_FILE",
+            "operator": "NOT_IN",
+            "fieldValue": "48b14365-392c-4c83-8d06-324eadc312f3",
+            "orderIndex": 1
+          }
+        ],
         "groups": [
           {
-            "groupName": "Группа 1",
-            "logicalOperator": "AND",
+            "groupName": "SMID группа",
+            "logicalOperator": "OR",
             "orderIndex": 0,
             "conditions": [
               {
                 "fieldType": "SMID",
                 "operator": "EQUAL",
-                "fieldValue": "123456789",
-                "logicalOperator": "AND",
+                "fieldValue": "3586067540",
                 "orderIndex": 0
               },
               {
-                "fieldType": "COUNTRY",
+                "fieldType": "SMID",
                 "operator": "EQUAL",
-                "fieldValue": "UA",
-                "logicalOperator": null,
-                "orderIndex": 1
-              }
-            ]
-          },
-          {
-            "groupName": "Группа 2",
-            "logicalOperator": "OR",
-            "orderIndex": 1,
-            "conditions": [
-              {
-                "fieldType": "OPERATING_SYSTEM",
-                "operator": "CONTAINS",
-                "fieldValue": "Android",
-                "logicalOperator": "AND",
-                "orderIndex": 0
-              },
-              {
-                "fieldType": "CLIENT_VERSION",
-                "operator": "GREATER_THAN",
-                "fieldValue": "2.0.0",
-                "logicalOperator": null,
+                "fieldValue": "9876543210",
                 "orderIndex": 1
               }
             ]
@@ -167,90 +78,126 @@
         ]
       }
     },
-    "createComplexLogicFilter": {
-      "description": "Создание фильтра со сложной логикой: (1 and 2 and 3) or (4 and 5)",
+    "createMultiGroupFilter": {
+      "description": "Создание фильтра с несколькими группами: (Android OR iOS) AND (Chrome OR Safari) AND COUNTRY=UA",
       "method": "POST",
-      "url": "/api/marketing-target-filters/flat",
+      "url": "/api/marketing-target-filters",
       "body": {
-        "filterName": "Сложная логика фильтра",
+        "filterName": "Мульти-группа фильтр",
         "marketingTargetId": 1,
-        "description": "Фильтр с логикой (1 and 2 and 3) or (4 and 5)",
+        "description": "Фильтр с несколькими группами условий",
         "isActive": true,
         "conditions": [
-          {
-            "fieldType": "SMID",
-            "operator": "EQUAL",
-            "fieldValue": "123456789",
-            "orderIndex": 0
-          },
           {
             "fieldType": "COUNTRY",
             "operator": "EQUAL",
             "fieldValue": "UA",
-            "orderIndex": 1
+            "orderIndex": 0
+          }
+        ],
+        "groups": [
+          {
+            "groupName": "Операционные системы",
+            "logicalOperator": "OR",
+            "orderIndex": 0,
+            "conditions": [
+              {
+                "fieldType": "OPERATING_SYSTEM",
+                "operator": "CONTAINS",
+                "fieldValue": "Android",
+                "orderIndex": 0
+              },
+              {
+                "fieldType": "OPERATING_SYSTEM",
+                "operator": "CONTAINS",
+                "fieldValue": "iOS",
+                "orderIndex": 1
+              }
+            ]
           },
           {
-            "fieldType": "OPERATING_SYSTEM",
-            "operator": "CONTAINS",
-            "fieldValue": "Android",
-            "orderIndex": 2
-          },
-          {
-            "fieldType": "BROWSER",
-            "operator": "CONTAINS",
-            "fieldValue": "Chrome",
-            "orderIndex": 3
-          },
+            "groupName": "Браузеры",
+            "logicalOperator": "OR",
+            "orderIndex": 1,
+            "conditions": [
+              {
+                "fieldType": "BROWSER",
+                "operator": "CONTAINS",
+                "fieldValue": "Chrome",
+                "orderIndex": 0
+              },
+              {
+                "fieldType": "BROWSER",
+                "operator": "CONTAINS",
+                "fieldValue": "Safari",
+                "orderIndex": 1
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "updateFilter": {
+      "description": "Обновление существующего фильтра",
+      "method": "PUT",
+      "url": "/api/marketing-target-filters/1",
+      "body": {
+        "filterName": "Обновленный фильтр",
+        "marketingTargetId": 1,
+        "description": "Обновленное описание фильтра",
+        "isActive": true,
+        "conditions": [
           {
             "fieldType": "CLIENT_VERSION",
             "operator": "GREATER_THAN",
             "fieldValue": "2.0.0",
-            "orderIndex": 4
+            "orderIndex": 0
           }
         ],
-        "logicExpression": {
-          "root": {
-            "type": "GROUP",
-            "operator": "OR",
-            "children": [
+        "groups": [
+          {
+            "groupName": "Браузер и интернет",
+            "logicalOperator": "AND",
+            "orderIndex": 0,
+            "conditions": [
               {
-                "type": "GROUP",
-                "operator": "AND",
-                "children": [
-                  {
-                    "type": "CONDITION",
-                    "conditionIndex": 0
-                  },
-                  {
-                    "type": "CONDITION",
-                    "conditionIndex": 1
-                  },
-                  {
-                    "type": "CONDITION",
-                    "conditionIndex": 2
-                  }
-                ]
+                "fieldType": "BROWSER",
+                "operator": "CONTAINS",
+                "fieldValue": "Chrome",
+                "orderIndex": 0
               },
               {
-                "type": "GROUP",
-                "operator": "AND",
-                "children": [
-                  {
-                    "type": "CONDITION",
-                    "conditionIndex": 3
-                  },
-                  {
-                    "type": "CONDITION",
-                    "conditionIndex": 4
-                  }
-                ]
+                "fieldType": "INTERNET_TYPE",
+                "operator": "EQUAL",
+                "fieldValue": "Wi-Fi",
+                "orderIndex": 1
               }
             ]
           }
-        }
+        ]
       }
     },
-    "getFilterTypes": {
+    "getFilter": {
+      "description": "Получение фильтра по ID",
+      "method": "GET",
+      "url": "/api/marketing-target-filters/1"
+    },
+    "getAllFilters": {
+      "description": "Получение всех фильтров",
+      "method": "GET",
+      "url": "/api/marketing-target-filters"
+    },
+    "getFiltersByTarget": {
+      "description": "Получение фильтров по ID маркетинг таргета",
+      "method": "GET",
+      "url": "/api/marketing-target-filters/by-target/1"
+    },
+    "deleteFilter": {
+      "description": "Удаление фильтра",
+      "method": "DELETE",
+      "url": "/api/marketing-target-filters/1"
+    },
+    "getFieldTypes": {
       "description": "Получение доступных типов полей",
       "method": "GET",
       "url": "/api/marketing-target-filters/field-types",
@@ -277,10 +224,15 @@
         "NOT_CONTAINS",
         "GREATER_THAN",
         "LESS_THAN",
-        "GREATER_EQUAL",
-        "LESS_EQUAL",
+        "GREATER_THAN_OR_EQUAL",
+        "LESS_THAN_OR_EQUAL",
         "IN",
-        "NOT_IN"
+        "NOT_IN",
+        "REGEX",
+        "IS_NULL",
+        "IS_NOT_NULL",
+        "STARTS_WITH",
+        "ENDS_WITH"
       ]
     },
     "getLogicalOperators": {
@@ -292,112 +244,42 @@
         "OR"
       ]
     },
-    "validateLogicExpression": {
-      "description": "Валидация логического выражения фильтра",
+    "validateFilterStructure": {
+      "description": "Валидация структуры фильтра перед созданием/обновлением",
       "method": "POST",
-      "url": "/api/marketing-target-filters/validate-logic-expression",
+      "url": "/api/marketing-target-filters/validate",
       "body": {
-        "conditions": [
-          {
-            "fieldType": "SMID",
-            "operator": "EQUAL",
-            "fieldValue": "123456789",
-            "orderIndex": 0
-          },
-          {
-            "fieldType": "COUNTRY",
-            "operator": "EQUAL",
-            "fieldValue": "UA",
-            "orderIndex": 1
-          }
-        ],
-        "logicExpression": {
-          "root": {
-            "type": "GROUP",
-            "operator": "AND",
-            "children": [
-              {
-                "type": "CONDITION",
-                "conditionIndex": 0
-              },
-              {
-                "type": "CONDITION",
-                "conditionIndex": 1
-              }
-            ]
-          }
-        }
-      },
-      "response": {
-        "valid": true,
-        "expression": "(1 AND 2)"
-      }
-    },
-    "createComplexUserTargetingFilter": {
-      "description": "Создание фильтра: (SMID = первый OR SMID = второй) AND COUNTRY = UA AND NOT IN файл выборки",
-      "method": "POST",
-      "url": "/api/marketing-target-filters/flat",
-      "body": {
-        "filterName": "Сложная логика пользователей",
+        "filterName": "Тестовый фильтр",
         "marketingTargetId": 1,
-        "description": "Фильтр: (SMID1 или SMID2) И страна Украина И НЕ в файле выборки",
+        "description": "Фильтр для валидации",
         "isActive": true,
         "conditions": [
           {
-            "fieldType": "SMID",
-            "operator": "EQUAL",
-            "fieldValue": "3586067540",
-            "orderIndex": 0
-          },
-          {
-            "fieldType": "SMID",
-            "operator": "EQUAL",
-            "fieldValue": "9876543210",
-            "orderIndex": 1
-          },
-          {
             "fieldType": "COUNTRY",
             "operator": "EQUAL",
             "fieldValue": "UA",
-            "orderIndex": 2
-          },
-          {
-            "fieldType": "DISTRIBUTION_GROUPS_FILE",
-            "operator": "NOT_IN",
-            "fieldValue": "48b14365-392c-4c83-8d06-324eadc312f3",
-            "orderIndex": 3
+            "orderIndex": 0
           }
-        ],
-        "logicExpression": {
-          "root": {
-            "type": "GROUP",
-            "operator": "AND",
-            "children": [
-              {
-                "type": "GROUP",
-                "operator": "OR",
-                "children": [
-                  {
-                    "type": "CONDITION",
-                    "conditionIndex": 0
-                  },
-                  {
-                    "type": "CONDITION",
-                    "conditionIndex": 1
-                  }
-                ]
-              },
-              {
-                "type": "CONDITION",
-                "conditionIndex": 2
-              },
-              {
-                "type": "CONDITION",
-                "conditionIndex": 3
-              }
-            ]
-          }
-        }
+        ]
+      },
+      "response": {
+        "valid": true,
+        "message": "Filter structure is valid"
+      }
+    },
+    "validateInvalidFilter": {
+      "description": "Пример валидации невалидного фильтра",
+      "method": "POST",
+      "url": "/api/marketing-target-filters/validate",
+      "body": {
+        "filterName": "",
+        "marketingTargetId": null,
+        "isActive": true,
+        "conditions": []
+      },
+      "response": {
+        "valid": false,
+        "message": "Filter name is required"
       }
     }
   },
@@ -409,10 +291,11 @@
       "body": {
         "smid": "3586067540",
         "country": "UA",
-        "operatingSystem": "Android",
-        "clientVersion": "2.1.0",
-        "browser": "Chrome",
-        "language": "uk"
+        "operatingSystem": "iOS 15.0",
+        "clientVersion": "2.238.1",
+        "browser": "Safari",
+        "language": "uk",
+        "internetType": "Wi-Fi"
       },
       "response": {
         "filterId": 1,
@@ -431,39 +314,38 @@
           "isActive": true,
           "conditions": [
             {
-              "fieldType": "SMID",
-              "operator": "EQUAL",
-              "fieldValue": "3586067540",
-              "orderIndex": 0
-            },
-            {
               "fieldType": "COUNTRY",
               "operator": "EQUAL",
               "fieldValue": "UA",
-              "orderIndex": 1
+              "orderIndex": 0
             }
           ],
-          "logicExpression": {
-            "root": {
-              "type": "GROUP",
-              "operator": "AND",
-              "children": [
+          "groups": [
+            {
+              "groupName": "SMID группа",
+              "logicalOperator": "OR",
+              "orderIndex": 0,
+              "conditions": [
                 {
-                  "type": "CONDITION",
-                  "conditionIndex": 0
+                  "fieldType": "SMID",
+                  "operator": "EQUAL",
+                  "fieldValue": "3586067540",
+                  "orderIndex": 0
                 },
                 {
-                  "type": "CONDITION",
-                  "conditionIndex": 1
+                  "fieldType": "SMID",
+                  "operator": "EQUAL",
+                  "fieldValue": "9876543210",
+                  "orderIndex": 1
                 }
               ]
             }
-          }
+          ]
         },
         "userRequest": {
           "smid": "3586067540",
           "country": "UA",
-          "operatingSystem": "Android",
+          "operatingSystem": "Android 12",
           "clientVersion": "2.1.0"
         }
       },
@@ -472,13 +354,13 @@
       }
     },
     "evaluateComplexFilter": {
-      "description": "Проверить сложный фильтр: (SMID1 OR SMID2) AND COUNTRY=UA AND NOT_IN файл",
+      "description": "Проверить сложный фильтр с группами",
       "method": "POST",
       "url": "/api/marketing-target-filters/evaluate/2",
       "body": {
         "smid": "9876543210",
         "country": "UA",
-        "operatingSystem": "iOS",
+        "operatingSystem": "iOS 16.0",
         "clientVersion": "3.0.0",
         "browser": "Safari",
         "language": "uk"
@@ -505,36 +387,52 @@
     }
   },
   "testScenarios": {
-    "scenario1": {
-      "description": "Тестирование создания и получения фильтра",
+    "scenario1_simple_filter": {
+      "description": "Тестирование простого фильтра с условиями на корневом уровне",
       "steps": [
-        "1. POST /api/marketing-target-filters/flat - создать фильтр",
-        "2. GET /api/marketing-target-filters/flat/{id} - получить созданный фильтр",
-        "3. GET /api/marketing-target-filters/flat/by-target/{marketingTargetId} - получить все фильтры для таргета"
+        "1. POST /api/marketing-target-filters - создать простой фильтр",
+        "2. GET /api/marketing-target-filters/{id} - получить созданный фильтр",
+        "3. POST /api/marketing-target-filters/evaluate/{id} - проверить пользователя (должен подходить)",
+        "4. POST /api/marketing-target-filters/evaluate/{id} - проверить другого пользователя (не должен подходить)"
       ]
     },
-    "scenario2": {
-      "description": "Тестирование обновления и удаления фильтра",
+    "scenario2_complex_filter": {
+      "description": "Тестирование сложного фильтра с группами",
       "steps": [
-        "1. PUT /api/marketing-target-filters/flat/{id} - обновить фильтр",
-        "2. GET /api/marketing-target-filters/flat/{id} - проверить обновления",
-        "3. DELETE /api/marketing-target-filters/{id} - удалить фильтр"
+        "1. POST /api/marketing-target-filters - создать фильтр с группами (SMID1 OR SMID2) AND COUNTRY=UA",
+        "2. GET /api/marketing-target-filters/{id} - получить созданный фильтр",
+        "3. POST /api/marketing-target-filters/evaluate/{id} - проверить SMID1 + UA (должен подходить)",
+        "4. POST /api/marketing-target-filters/evaluate/{id} - проверить SMID2 + UA (должен подходить)",
+        "5. POST /api/marketing-target-filters/evaluate/{id} - проверить SMID1 + PL (не должен подходить)"
       ]
     },
-    "scenario3": {
-      "description": "Тестирование валидации логических выражений",
+    "scenario3_distribution_file": {
+      "description": "Тестирование фильтра с файлом выборки",
       "steps": [
-        "1. POST /api/marketing-target-filters/validate-logic-expression - валидировать простое выражение",
-        "2. POST /api/marketing-target-filters/validate-logic-expression - валидировать сложное выражение",
-        "3. POST /api/marketing-target-filters/validate-logic-expression - валидировать некорректное выражение"
+        "1. POST /api/marketing-target-filters - создать фильтр с DISTRIBUTION_GROUPS_FILE NOT_IN",
+        "2. POST /api/marketing-target-filters/evaluate/{id} - проверить SMID который есть в файле (не должен подходить)",
+        "3. POST /api/marketing-target-filters/evaluate/{id} - проверить SMID которого нет в файле (должен подходить)"
       ]
     },
-    "scenario4": {
-      "description": "Тестирование создания фильтра со сложной логикой",
+    "scenario4_multi_group": {
+      "description": "Тестирование фильтра с несколькими группами",
       "steps": [
-        "1. POST /api/marketing-target-filters/flat - создать фильтр с логикой (1 and 2) or (3 and 4)",
-        "2. GET /api/marketing-target-filters/flat/{id} - проверить созданный фильтр",
-        "3. POST /api/marketing-target-filters/validate-logic-expression - валидировать логику"
+        "1. POST /api/marketing-target-filters - создать фильтр (Android OR iOS) AND (Chrome OR Safari) AND COUNTRY=UA",
+        "2. POST /api/marketing-target-filters/evaluate/{id} - проверить Android + Chrome + UA (должен подходить)",
+        "3. POST /api/marketing-target-filters/evaluate/{id} - проверить iOS + Safari + UA (должен подходить)",
+        "4. POST /api/marketing-target-filters/evaluate/{id} - проверить Android + Firefox + UA (не должен подходить)",
+        "5. POST /api/marketing-target-filters/evaluate/{id} - проверить Android + Chrome + PL (не должен подходить)"
+      ]
+    },
+    "scenario5_crud_operations": {
+      "description": "Тестирование CRUD операций",
+      "steps": [
+        "1. POST /api/marketing-target-filters - создать фильтр",
+        "2. GET /api/marketing-target-filters/{id} - получить фильтр",
+        "3. PUT /api/marketing-target-filters/{id} - обновить фильтр",
+        "4. GET /api/marketing-target-filters/{id} - проверить обновления",
+        "5. DELETE /api/marketing-target-filters/{id} - удалить фильтр",
+        "6. GET /api/marketing-target-filters/{id} - убедиться что фильтр удален (404)"
       ]
     }
   }

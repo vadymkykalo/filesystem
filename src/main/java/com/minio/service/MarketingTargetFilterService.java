@@ -3,20 +3,15 @@ package com.minio.service;
 import com.minio.dto.FilterConditionDto;
 import com.minio.dto.FilterGroupDto;
 import com.minio.dto.MarketingTargetFilterDto;
-import com.minio.model.LogicalOperator;
-import com.minio.model.MarketingTargetFilter;
-import com.minio.model.MarketingTargetFilterCondition;
-import com.minio.model.MarketingTargetFilterGroup;
+import com.minio.model.*;
 import com.minio.repository.MarketingTargetFilterRepository;
 import com.minio.repository.MarketingTargetFilterConditionRepository;
 import com.minio.repository.MarketingTargetFilterGroupRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -50,6 +45,7 @@ public class MarketingTargetFilterService {
     
     @Transactional
     public MarketingTargetFilterDto createFilter(MarketingTargetFilterDto filterDto) {
+        validateFilterStructure(filterDto);
         validateFilterName(filterDto.getFilterName(), null);
         
         MarketingTargetFilter filter = convertToEntity(filterDto);
@@ -99,6 +95,7 @@ public class MarketingTargetFilterService {
             throw new RuntimeException("Filter not found with id: " + id);
         }
         
+        validateFilterStructure(filterDto);
         validateFilterName(filterDto.getFilterName(), id);
         
         // Update main filter
@@ -164,6 +161,123 @@ public class MarketingTargetFilterService {
         if (exists) {
             throw new RuntimeException("Filter with name '" + filterName + "' already exists");
         }
+    }
+    
+    /**
+     * Validate filter structure
+     */
+    public void validateFilterStructure(MarketingTargetFilterDto filterDto) {
+        if (filterDto == null) {
+            throw new RuntimeException("Filter cannot be null");
+        }
+        
+        // Check required fields
+        if (filterDto.getFilterName() == null || filterDto.getFilterName().trim().isEmpty()) {
+            throw new RuntimeException("Filter name is required");
+        }
+        
+        if (filterDto.getMarketingTargetId() == null) {
+            throw new RuntimeException("Marketing target ID is required");
+        }
+        
+        // Check that there is at least one condition or group
+        boolean hasConditions = filterDto.getConditions() != null && !filterDto.getConditions().isEmpty();
+        boolean hasGroups = filterDto.getGroups() != null && !filterDto.getGroups().isEmpty();
+        
+        if (!hasConditions && !hasGroups) {
+            throw new RuntimeException("Filter must have at least one condition or group");
+        }
+        
+        // Validate root level conditions
+        if (hasConditions) {
+            validateConditions(filterDto.getConditions(), "root level");
+        }
+        
+        // Validate groups
+        if (hasGroups) {
+            validateGroups(filterDto.getGroups());
+        }
+    }
+    
+    private void validateConditions(List<FilterConditionDto> conditions, String context) {
+        if (conditions == null || conditions.isEmpty()) {
+            return;
+        }
+        
+        for (int i = 0; i < conditions.size(); i++) {
+            FilterConditionDto condition = conditions.get(i);
+            
+            if (condition.getFieldType() == null) {
+                throw new RuntimeException("Field type is required for condition " + i + " at " + context);
+            }
+            
+            if (condition.getOperator() == null) {
+                throw new RuntimeException("Operator is required for condition " + i + " at " + context);
+            }
+            
+            // Check field value (except for IS_NULL and IS_NOT_NULL)
+            if (condition.getOperator() != FilterOperator.IS_NULL && 
+                condition.getOperator() != FilterOperator.IS_NOT_NULL) {
+                if (condition.getFieldValue() == null || condition.getFieldValue().trim().isEmpty()) {
+                    throw new RuntimeException("Field value is required for condition " + i + " at " + context + " with operator " + condition.getOperator());
+                }
+            }
+            
+            // Special validation for distribution group files
+            if (condition.getFieldType() == FilterFieldType.DISTRIBUTION_GROUPS_FILE) {
+                if (condition.getOperator() != FilterOperator.IN && 
+                    condition.getOperator() != FilterOperator.NOT_IN &&
+                    condition.getOperator() != FilterOperator.EQUAL &&
+                    condition.getOperator() != FilterOperator.NOT_EQUAL) {
+                    throw new RuntimeException("DISTRIBUTION_GROUPS_FILE supports only IN, NOT_IN, EQUAL, NOT_EQUAL operators");
+                }
+            }
+            
+            // Version validation for numeric operators
+            if (condition.getFieldType() == FilterFieldType.CLIENT_VERSION && 
+                (condition.getOperator() == FilterOperator.GREATER_THAN ||
+                 condition.getOperator() == FilterOperator.GREATER_THAN_OR_EQUAL ||
+                 condition.getOperator() == FilterOperator.LESS_THAN ||
+                 condition.getOperator() == FilterOperator.LESS_THAN_OR_EQUAL)) {
+                if (!isValidVersion(condition.getFieldValue())) {
+                    throw new RuntimeException("Invalid version format for condition " + i + " at " + context + ": " + condition.getFieldValue());
+                }
+            }
+        }
+    }
+    
+    private void validateGroups(List<FilterGroupDto> groups) {
+        if (groups == null || groups.isEmpty()) {
+            return;
+        }
+        
+        for (int i = 0; i < groups.size(); i++) {
+            FilterGroupDto group = groups.get(i);
+            
+            if (group.getGroupName() == null || group.getGroupName().trim().isEmpty()) {
+                throw new RuntimeException("Group name is required for group " + i);
+            }
+            
+            if (group.getLogicalOperator() == null) {
+                throw new RuntimeException("Logical operator is required for group " + i + " (" + group.getGroupName() + ")");
+            }
+            
+            if (group.getConditions() == null || group.getConditions().isEmpty()) {
+                throw new RuntimeException("Group " + i + " (" + group.getGroupName() + ") must have at least one condition");
+            }
+            
+            // Validate conditions in group
+            validateConditions(group.getConditions(), "group '" + group.getGroupName() + "'");
+        }
+    }
+    
+    private boolean isValidVersion(String version) {
+        if (version == null || version.trim().isEmpty()) {
+            return false;
+        }
+        
+        // Simple version format check (e.g.: 1.0.0, 2.1.5, 10.15.7)
+        return version.matches("^\\d+(\\.\\d+)*$");
     }
     
     private MarketingTargetFilterDto convertToDto(MarketingTargetFilter filter) {

@@ -1,0 +1,382 @@
+{
+  "description": "Все возможные вариации условий в фильтрах - примеры на пальцах",
+  "variations": {
+    "simple_conditions": {
+      "description": "Простые условия с разными операторами",
+      "examples": [
+        {
+          "name": "Точное совпадение SMID",
+          "condition": {
+            "fieldType": "SMID",
+            "operator": "EQUAL",
+            "fieldValue": "3586067540"
+          },
+          "logic": "SMID = 3586067540"
+        },
+        {
+          "name": "Страна НЕ Беларусь",
+          "condition": {
+            "fieldType": "COUNTRY",
+            "operator": "NOT_EQUAL",
+            "fieldValue": "BY"
+          },
+          "logic": "COUNTRY ≠ BY"
+        },
+        {
+          "name": "ОС содержит iOS",
+          "condition": {
+            "fieldType": "OPERATING_SYSTEM",
+            "operator": "CONTAINS",
+            "fieldValue": "iOS"
+          },
+          "logic": "OPERATING_SYSTEM содержит 'iOS'"
+        },
+        {
+          "name": "Версия больше 2.0.0",
+          "condition": {
+            "fieldType": "CLIENT_VERSION",
+            "operator": "GREATER_THAN",
+            "fieldValue": "2.0.0"
+          },
+          "logic": "CLIENT_VERSION > 2.0.0"
+        },
+        {
+          "name": "Браузер начинается с Chrome",
+          "condition": {
+            "fieldType": "BROWSER",
+            "operator": "STARTS_WITH",
+            "fieldValue": "Chrome"
+          },
+          "logic": "BROWSER начинается с 'Chrome'"
+        },
+        {
+          "name": "НЕ в файле выборки",
+          "condition": {
+            "fieldType": "DISTRIBUTION_GROUPS_FILE",
+            "operator": "NOT_IN",
+            "fieldValue": "48b14365-392c-4c83-8d06-324eadc312f3"
+          },
+          "logic": "SMID НЕ в файле выборки"
+        }
+      ]
+    },
+    "complex_logic_examples": {
+      "description": "Сложные логические выражения как на твоей картинке",
+      "examples": [
+        {
+          "name": "(1 and 2 and 3) or (4 and 5)",
+          "filter": {
+            "conditions": [],
+            "groups": [
+              {
+                "groupName": "Группа 1-2-3",
+                "logicalOperator": "AND",
+                "conditions": [
+                  {"fieldType": "SMID", "operator": "EQUAL", "fieldValue": "111"},
+                  {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "UA"},
+                  {"fieldType": "OPERATING_SYSTEM", "operator": "CONTAINS", "fieldValue": "Android"}
+                ]
+              },
+              {
+                "groupName": "Группа 4-5",
+                "logicalOperator": "AND", 
+                "conditions": [
+                  {"fieldType": "BROWSER", "operator": "CONTAINS", "fieldValue": "Chrome"},
+                  {"fieldType": "CLIENT_VERSION", "operator": "GREATER_THAN", "fieldValue": "2.0.0"}
+                ]
+              }
+            ]
+          },
+          "logic": "(SMID=111 AND COUNTRY=UA AND Android) OR (Chrome AND VERSION>2.0.0)"
+        },
+        {
+          "name": "(1 or 2) and (3 or 4 or 5)",
+          "filter": {
+            "conditions": [],
+            "groups": [
+              {
+                "groupName": "SMID группа",
+                "logicalOperator": "OR",
+                "conditions": [
+                  {"fieldType": "SMID", "operator": "EQUAL", "fieldValue": "111"},
+                  {"fieldType": "SMID", "operator": "EQUAL", "fieldValue": "222"}
+                ]
+              },
+              {
+                "groupName": "Платформа группа",
+                "logicalOperator": "OR",
+                "conditions": [
+                  {"fieldType": "OPERATING_SYSTEM", "operator": "CONTAINS", "fieldValue": "Android"},
+                  {"fieldType": "OPERATING_SYSTEM", "operator": "CONTAINS", "fieldValue": "iOS"},
+                  {"fieldType": "BROWSER", "operator": "CONTAINS", "fieldValue": "Chrome"}
+                ]
+              }
+            ]
+          },
+          "logic": "(SMID=111 OR SMID=222) AND (Android OR iOS OR Chrome)"
+        },
+        {
+          "name": "1 or 2 or 3",
+          "filter": {
+            "conditions": [],
+            "groups": [
+              {
+                "groupName": "Любой из трех",
+                "logicalOperator": "OR",
+                "conditions": [
+                  {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "UA"},
+                  {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "PL"},
+                  {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "DE"}
+                ]
+              }
+            ]
+          },
+          "logic": "COUNTRY=UA OR COUNTRY=PL OR COUNTRY=DE"
+        },
+        {
+          "name": "1 and 2 and 3",
+          "filter": {
+            "conditions": [
+              {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "UA"},
+              {"fieldType": "OPERATING_SYSTEM", "operator": "CONTAINS", "fieldValue": "Android"},
+              {"fieldType": "CLIENT_VERSION", "operator": "GREATER_THAN", "fieldValue": "2.0.0"}
+            ]
+          },
+          "logic": "COUNTRY=UA AND Android AND VERSION>2.0.0"
+        },
+        {
+          "name": "1 and 2 and (not 2)",
+          "filter": {
+            "conditions": [
+              {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "UA"},
+              {"fieldType": "OPERATING_SYSTEM", "operator": "CONTAINS", "fieldValue": "Android"},
+              {"fieldType": "OPERATING_SYSTEM", "operator": "NOT_CONTAINS", "fieldValue": "iOS"}
+            ]
+          },
+          "logic": "COUNTRY=UA AND Android AND НЕ iOS"
+        },
+        {
+          "name": "(1 or 2) and (not 3)",
+          "filter": {
+            "conditions": [
+              {"fieldType": "DISTRIBUTION_GROUPS_FILE", "operator": "NOT_IN", "fieldValue": "file-id"}
+            ],
+            "groups": [
+              {
+                "groupName": "SMID группа",
+                "logicalOperator": "OR",
+                "conditions": [
+                  {"fieldType": "SMID", "operator": "EQUAL", "fieldValue": "111"},
+                  {"fieldType": "SMID", "operator": "EQUAL", "fieldValue": "222"}
+                ]
+              }
+            ]
+          },
+          "logic": "(SMID=111 OR SMID=222) AND НЕ_В_ФАЙЛЕ"
+        },
+        {
+          "name": "(1 and 2) or (3 not 4) or 5",
+          "filter": {
+            "conditions": [],
+            "groups": [
+              {
+                "groupName": "Группа 1-2",
+                "logicalOperator": "AND",
+                "conditions": [
+                  {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "UA"},
+                  {"fieldType": "OPERATING_SYSTEM", "operator": "CONTAINS", "fieldValue": "Android"}
+                ]
+              },
+              {
+                "groupName": "Группа 3-НЕ4",
+                "logicalOperator": "AND",
+                "conditions": [
+                  {"fieldType": "BROWSER", "operator": "CONTAINS", "fieldValue": "Chrome"},
+                  {"fieldType": "BROWSER", "operator": "NOT_CONTAINS", "fieldValue": "Safari"}
+                ]
+              },
+              {
+                "groupName": "Группа 5",
+                "logicalOperator": "OR",
+                "conditions": [
+                  {"fieldType": "CLIENT_VERSION", "operator": "GREATER_THAN", "fieldValue": "3.0.0"}
+                ]
+              }
+            ]
+          },
+          "logic": "(UA AND Android) OR (Chrome AND НЕ Safari) OR VERSION>3.0.0"
+        }
+      ]
+    },
+    "real_world_examples": {
+      "description": "Реальные примеры для маркетинговых кампаний",
+      "examples": [
+        {
+          "name": "Премиум пользователи iOS",
+          "filter": {
+            "conditions": [
+              {"fieldType": "OPERATING_SYSTEM", "operator": "CONTAINS", "fieldValue": "iOS"},
+              {"fieldType": "CLIENT_VERSION", "operator": "GREATER_THAN_OR_EQUAL", "fieldValue": "3.0.0"}
+            ],
+            "groups": [
+              {
+                "groupName": "Премиум страны",
+                "logicalOperator": "OR",
+                "conditions": [
+                  {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "US"},
+                  {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "DE"},
+                  {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "UK"}
+                ]
+              }
+            ]
+          },
+          "logic": "iOS AND VERSION>=3.0.0 AND (US OR DE OR UK)"
+        },
+        {
+          "name": "Исключить тестовых пользователей",
+          "filter": {
+            "conditions": [
+              {"fieldType": "DISTRIBUTION_GROUPS_FILE", "operator": "NOT_IN", "fieldValue": "test-users-file"},
+              {"fieldType": "SMID", "operator": "IS_NOT_NULL", "fieldValue": ""}
+            ],
+            "groups": [
+              {
+                "groupName": "Активные платформы",
+                "logicalOperator": "OR",
+                "conditions": [
+                  {"fieldType": "OPERATING_SYSTEM", "operator": "CONTAINS", "fieldValue": "Android"},
+                  {"fieldType": "OPERATING_SYSTEM", "operator": "CONTAINS", "fieldValue": "iOS"}
+                ]
+              }
+            ]
+          },
+          "logic": "НЕ_ТЕСТОВЫЕ AND SMID_НЕ_ПУСТОЙ AND (Android OR iOS)"
+        },
+        {
+          "name": "Региональная кампания с исключениями",
+          "filter": {
+            "conditions": [
+              {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "UA"}
+            ],
+            "groups": [
+              {
+                "groupName": "Целевые SMID",
+                "logicalOperator": "OR",
+                "conditions": [
+                  {"fieldType": "SMID", "operator": "STARTS_WITH", "fieldValue": "380"},
+                  {"fieldType": "SMID", "operator": "STARTS_WITH", "fieldValue": "050"},
+                  {"fieldType": "SMID", "operator": "STARTS_WITH", "fieldValue": "067"}
+                ]
+              },
+              {
+                "groupName": "Исключения",
+                "logicalOperator": "AND",
+                "conditions": [
+                  {"fieldType": "DISTRIBUTION_GROUPS_FILE", "operator": "NOT_IN", "fieldValue": "blocked-users"},
+                  {"fieldType": "CLIENT_VERSION", "operator": "GREATER_THAN", "fieldValue": "1.0.0"}
+                ]
+              }
+            ]
+          },
+          "logic": "UA AND (SMID_380* OR SMID_050* OR SMID_067*) AND НЕ_ЗАБЛОКИРОВАННЫЕ AND VERSION>1.0.0"
+        }
+      ]
+    }
+  },
+  "test_scenarios": {
+    "description": "Сценарии для тестирования разных логических выражений",
+    "scenarios": [
+      {
+        "name": "Тест простой AND логики",
+        "filter": {
+          "conditions": [
+            {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "UA"},
+            {"fieldType": "OPERATING_SYSTEM", "operator": "CONTAINS", "fieldValue": "Android"}
+          ]
+        },
+        "test_cases": [
+          {
+            "user": {"country": "UA", "operatingSystem": "Android 12"},
+            "expected": true,
+            "reason": "UA AND Android - оба условия выполнены"
+          },
+          {
+            "user": {"country": "PL", "operatingSystem": "Android 12"},
+            "expected": false,
+            "reason": "PL AND Android - страна не подходит"
+          },
+          {
+            "user": {"country": "UA", "operatingSystem": "iOS 15"},
+            "expected": false,
+            "reason": "UA AND iOS - ОС не подходит"
+          }
+        ]
+      },
+      {
+        "name": "Тест OR логики в группе",
+        "filter": {
+          "groups": [
+            {
+              "logicalOperator": "OR",
+              "conditions": [
+                {"fieldType": "SMID", "operator": "EQUAL", "fieldValue": "111"},
+                {"fieldType": "SMID", "operator": "EQUAL", "fieldValue": "222"}
+              ]
+            }
+          ]
+        },
+        "test_cases": [
+          {
+            "user": {"smid": "111"},
+            "expected": true,
+            "reason": "SMID=111 - первое условие выполнено"
+          },
+          {
+            "user": {"smid": "222"},
+            "expected": true,
+            "reason": "SMID=222 - второе условие выполнено"
+          },
+          {
+            "user": {"smid": "333"},
+            "expected": false,
+            "reason": "SMID=333 - ни одно условие не выполнено"
+          }
+        ]
+      },
+      {
+        "name": "Тест смешанной логики",
+        "filter": {
+          "conditions": [
+            {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "UA"}
+          ],
+          "groups": [
+            {
+              "logicalOperator": "OR",
+              "conditions": [
+                {"fieldType": "SMID", "operator": "EQUAL", "fieldValue": "111"},
+                {"fieldType": "SMID", "operator": "EQUAL", "fieldValue": "222"}
+              ]
+            }
+          ]
+        },
+        "test_cases": [
+          {
+            "user": {"country": "UA", "smid": "111"},
+            "expected": true,
+            "reason": "UA AND (SMID=111 OR SMID=222) - оба условия выполнены"
+          },
+          {
+            "user": {"country": "PL", "smid": "111"},
+            "expected": false,
+            "reason": "PL AND (SMID=111 OR SMID=222) - страна не подходит"
+          },
+          {
+            "user": {"country": "UA", "smid": "333"},
+            "expected": false,
+            "reason": "UA AND (SMID=111 OR SMID=222) - SMID не подходит"
+          }
+        ]
+      }
+    ]
+  }
+}
