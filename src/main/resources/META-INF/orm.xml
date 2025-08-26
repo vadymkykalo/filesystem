@@ -5,29 +5,96 @@
                  https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
                  version="3.0">
 
-    <named-query name="FileEntity.findByFileName">
+
+
+    <!-- MarketingTargetFilter queries -->
+    <named-query name="MarketingTargetFilter.findAll">
         <query>
-            SELECT f FROM FileEntity f WHERE f.fileName LIKE :fileName ORDER BY f.uploadDate DESC
+            SELECT f FROM MarketingTargetFilter f ORDER BY f.id
         </query>
     </named-query>
 
-    <named-query name="FileEntity.findByContentType">
+    <named-query name="MarketingTargetFilter.findByMarketingTargetId">
         <query>
-            SELECT f FROM FileEntity f WHERE f.contentType = :contentType ORDER BY f.uploadDate DESC
+            SELECT f FROM MarketingTargetFilter f WHERE f.marketingTargetId = :marketingTargetId ORDER BY f.id
         </query>
     </named-query>
 
-    <named-query name="FileEntity.findByDateRange">
+
+    <named-query name="MarketingTargetFilter.findByIdWithConditions">
         <query>
-            SELECT f FROM FileEntity f 
-            WHERE f.uploadDate BETWEEN :startDate AND :endDate 
-            ORDER BY f.uploadDate DESC
+            SELECT f FROM MarketingTargetFilter f 
+            LEFT JOIN FETCH f.conditions c 
+            LEFT JOIN FETCH f.groups g 
+            WHERE f.id = :id
         </query>
     </named-query>
 
-    <named-query name="FileEntity.findLargeFiles">
+    <named-query name="MarketingTargetFilter.existsByFilterName">
         <query>
-            SELECT f FROM FileEntity f WHERE f.fileSize > :minSize ORDER BY f.fileSize DESC
+            SELECT COUNT(f) FROM MarketingTargetFilter f WHERE f.filterName = :filterName
+        </query>
+    </named-query>
+
+    <named-query name="MarketingTargetFilter.existsByFilterNameAndIdNot">
+        <query>
+            SELECT COUNT(f) FROM MarketingTargetFilter f WHERE f.filterName = :filterName AND f.id != :id
+        </query>
+    </named-query>
+
+    <!-- MarketingTargetFilterCondition queries -->
+
+    <named-query name="MarketingTargetFilterCondition.findByGroupId">
+        <query>
+            SELECT c FROM MarketingTargetFilterCondition c WHERE c.groupId = :groupId ORDER BY c.orderIndex
+        </query>
+    </named-query>
+
+    <named-query name="MarketingTargetFilterCondition.deleteByFilterId">
+        <query>
+            DELETE FROM MarketingTargetFilterCondition c WHERE c.marketingTargetFilterId = :filterId
+        </query>
+    </named-query>
+
+    <named-query name="MarketingTargetFilterCondition.deleteByGroupId">
+        <query>
+            DELETE FROM MarketingTargetFilterCondition c WHERE c.groupId = :groupId
+        </query>
+    </named-query>
+
+    <!-- MarketingTargetFilterGroup queries -->
+
+    <named-query name="MarketingTargetFilterGroup.findByIdWithConditions">
+        <query>
+            SELECT g FROM MarketingTargetFilterGroup g 
+            LEFT JOIN FETCH g.conditions c 
+            WHERE g.id = :id ORDER BY c.orderIndex
+        </query>
+    </named-query>
+
+    <named-query name="MarketingTargetFilterGroup.deleteByFilterId">
+        <query>
+            DELETE FROM MarketingTargetFilterGroup g WHERE g.marketingTargetFilterId = :filterId
+        </query>
+    </named-query>
+
+    <!-- MarketingTargetListItem queries -->
+
+    <named-query name="MarketingTargetListItem.countByMarketingTargetIdAndSmid">
+        <query>
+            SELECT COUNT(m) FROM MarketingTargetListItem m WHERE m.marketingTargetId = :marketingTargetId AND m.smid = :smid
+        </query>
+    </named-query>
+
+    <named-query name="MarketingTargetListItem.deleteByMarketingTargetId">
+        <query>
+            DELETE FROM MarketingTargetListItem m WHERE m.marketingTargetId = :marketingTargetId
+        </query>
+    </named-query>
+
+    <named-query name="MarketingTargetListItem.countByMarketingTargetId">
+        <query>
+            SELECT COUNT(m) FROM MarketingTargetListItem m WHERE m.marketingTargetId = :marketingTargetId
         </query>
     </named-query>
 
