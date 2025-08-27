@@ -293,9 +293,11 @@ public class MarketingTargetFilterService {
     private MarketingTargetFilterDto convertToDtoWithDetails(MarketingTargetFilter filter) {
         MarketingTargetFilterDto dto = convertToDto(filter);
         
-        // Convert conditions
+        // Convert only root-level conditions (conditions that don't belong to any group)
         if (filter.getConditions() != null) {
             dto.setConditions(filter.getConditions().stream()
+                .filter(condition -> condition.getGroupId() == null) // Only root-level conditions
+                .sorted((c1, c2) -> Integer.compare(c1.getOrderIndex(), c2.getOrderIndex())) // Sort by orderIndex
                 .map(this::convertConditionToDto)
                 .collect(Collectors.toList()));
         }
@@ -303,6 +305,7 @@ public class MarketingTargetFilterService {
         // Convert groups
         if (filter.getGroups() != null) {
             dto.setGroups(filter.getGroups().stream()
+                .sorted((g1, g2) -> Integer.compare(g1.getOrderIndex(), g2.getOrderIndex())) // Sort by orderIndex
                 .map(this::convertGroupToDto)
                 .collect(Collectors.toList()));
         }
@@ -349,6 +352,7 @@ public class MarketingTargetFilterService {
         
         if (group.getConditions() != null) {
             dto.setConditions(group.getConditions().stream()
+                .sorted((c1, c2) -> Integer.compare(c1.getOrderIndex(), c2.getOrderIndex())) // Sort by orderIndex
                 .map(this::convertConditionToDto)
                 .collect(Collectors.toList()));
         }

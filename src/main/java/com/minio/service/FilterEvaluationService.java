@@ -45,12 +45,10 @@ public class FilterEvaluationService {
             return false;
         }
         
-        // Simple evaluation: check all conditions with AND logic
+        // Evaluate root-level conditions with proper logical operators
         if (filter.getConditions() != null && !filter.getConditions().isEmpty()) {
-            for (FilterConditionDto condition : filter.getConditions()) {
-                if (!evaluateCondition(condition, userRequest)) {
-                    return false;
-                }
+            if (!evaluateConditionsWithLogicalOperators(filter.getConditions(), userRequest)) {
+                return false;
             }
         }
         
@@ -68,6 +66,35 @@ public class FilterEvaluationService {
         }
         
         return true;
+    }
+    
+    /**
+     * Evaluate conditions with their individual logical operators
+     */
+    private boolean evaluateConditionsWithLogicalOperators(List<FilterConditionDto> conditions, UserRequestDto userRequest) {
+        if (conditions == null || conditions.isEmpty()) {
+            return true;
+        }
+        
+        // Start with the first condition result
+        boolean result = evaluateCondition(conditions.get(0), userRequest);
+        
+        // Process remaining conditions with their logical operators
+        for (int i = 1; i < conditions.size(); i++) {
+            FilterConditionDto condition = conditions.get(i);
+            boolean conditionResult = evaluateCondition(condition, userRequest);
+            
+            // Use the logical operator of the current condition to combine with previous result
+            LogicalOperator operator = condition.getLogicalOperator();
+            if (operator == LogicalOperator.OR) {
+                result = result || conditionResult;
+            } else {
+                // Default to AND if operator is null or AND
+                result = result && conditionResult;
+            }
+        }
+        
+        return result;
     }
     
     /**

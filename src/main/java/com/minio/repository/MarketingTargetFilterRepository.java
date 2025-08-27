@@ -37,13 +37,26 @@ public class MarketingTargetFilterRepository {
     }
     
     public Optional<MarketingTargetFilter> findByIdWithConditions(Long id) {
-        TypedQuery<MarketingTargetFilter> query = entityManager.createNamedQuery(
-            "MarketingTargetFilter.findByIdWithConditions",
-            MarketingTargetFilter.class
-        );
-        query.setParameter("id", id);
-        List<MarketingTargetFilter> results = query.getResultList();
-        return results.isEmpty() ? Optional.empty() : Optional.of(results.get(0));
+        MarketingTargetFilter filter = entityManager.find(MarketingTargetFilter.class, id);
+        if (filter != null) {
+            // Явно инициализируем lazy коллекции через Hibernate.initialize()
+            org.hibernate.Hibernate.initialize(filter.getConditions());
+            org.hibernate.Hibernate.initialize(filter.getGroups());
+            
+            System.out.println("DEBUG: filter.getConditions() size = " + (filter.getConditions() != null ? filter.getConditions().size() : "null"));
+            System.out.println("DEBUG: filter.getGroups() size = " + (filter.getGroups() != null ? filter.getGroups().size() : "null"));
+            
+            // Инициализируем conditions внутри групп (только после того как groups уже инициализированы)
+            if (filter.getGroups() != null && !filter.getGroups().isEmpty()) {
+                System.out.println("DEBUG: Инициализируем conditions в группах");
+                filter.getGroups().forEach(group -> 
+                    org.hibernate.Hibernate.initialize(group.getConditions())
+                );
+            } else {
+                System.out.println("DEBUG: Groups пустые или null - пропускаем инициализацию");
+            }
+        }
+        return Optional.ofNullable(filter);
     }
     
     @Transactional

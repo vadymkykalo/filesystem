@@ -21,15 +21,6 @@
     </named-query>
 
 
-    <named-query name="MarketingTargetFilter.findByIdWithConditions">
-        <query>
-            SELECT f FROM MarketingTargetFilter f 
-            LEFT JOIN FETCH f.conditions c 
-            LEFT JOIN FETCH f.groups g 
-            WHERE f.id = :id
-        </query>
-    </named-query>
-
     <named-query name="MarketingTargetFilter.existsByFilterName">
         <query>
             SELECT COUNT(f) FROM MarketingTargetFilter f WHERE f.filterName = :filterName
