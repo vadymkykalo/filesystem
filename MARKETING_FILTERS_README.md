@@ -136,7 +136,7 @@ AND, OR
   "groups": [
     {
       "groupName": "Країни",
-      "logicalOperator": null,
+      "logicalOperator": "AND",
       "orderIndex": 0,
       "conditions": [
         {
@@ -207,7 +207,7 @@ AND, OR
   "groups": [
     {
       "groupName": "Мобільні ОС",
-      "logicalOperator": null,
+      "logicalOperator": "AND",
       "orderIndex": 0,
       "conditions": [
         {
@@ -285,7 +285,7 @@ AND, OR
   "groups": [
     {
       "groupName": "Україна Android",
-      "logicalOperator": null,
+      "logicalOperator": "AND",
       "orderIndex": 0,
       "conditions": [
         {
@@ -339,7 +339,7 @@ AND, OR
   "groups": [
     {
       "groupName": "VIP SMID",
-      "logicalOperator": null,
+      "logicalOperator": "AND",
       "orderIndex": 0,
       "conditions": [
         {
@@ -517,10 +517,13 @@ AND, OR
 ## Важливі правила
 
 1. **logicalOperator = null** тільки для першої умови в root або в групі
-2. **orderIndex** обов'язковий і починається з 0
-3. **fieldValue** для IN/NOT_IN як JSON масив: `"[\"val1\",\"val2\"]"`
-4. **Групи** для складної логіки типу (A OR B) AND (C OR D)
-5. **Root умови** виконуються першими, потім групи
+2. **logicalOperator для груп** завжди вказувати (навіть для першої групи використовувати `"AND"`)⚠️
+3. **orderIndex** обов'язковий і починається з 0
+4. **fieldValue** для IN/NOT_IN як JSON масив: `"[\"val1\",\"val2\"]"`
+5. **Групи** для складної логіки типу (A OR B) AND (C OR D)
+6. **Root умови** виконуються першими, потім групи
+
+⚠️ **Примітка:** Валідація API вимагає обов'язкове вказання `logicalOperator` для всіх груп. Навіть якщо група перша, використовуйте `"logicalOperator": "AND"` замість `null`.
 
 ## Пояснення Conditions vs Groups
 
@@ -557,7 +560,7 @@ AND, OR
 "groups": [
   {
     "groupName": "Країни",
-    "logicalOperator": null,
+    "logicalOperator": "AND",
     "orderIndex": 0,
     "conditions": [
       {"fieldType": "COUNTRY", "operator": "EQUAL", "fieldValue": "UA", "logicalOperator": null, "orderIndex": 0},
