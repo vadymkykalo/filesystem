@@ -3,6 +3,7 @@ package com.minio.service;
 import com.minio.dto.UserRequestDto;
 import com.minio.dto.MarketingTargetFilterDto;
 import com.minio.dto.FilterConditionDto;
+import com.minio.dto.FilterGroupDto;
 import com.minio.model.FilterOperator;
 import com.minio.model.FilterFieldType;
 import com.minio.model.LogicalOperator;
@@ -54,14 +55,8 @@ public class FilterEvaluationService {
         
         // Check groups with their logical operators
         if (filter.getGroups() != null && !filter.getGroups().isEmpty()) {
-            // For now, simple AND logic between groups
-            for (var group : filter.getGroups()) {
-                if (group.getConditions() != null && !group.getConditions().isEmpty()) {
-                    boolean groupResult = evaluateGroupConditions(group.getConditions(), group.getLogicalOperator(), userRequest);
-                    if (!groupResult) {
-                        return false;
-                    }
-                }
+            if (!evaluateGroupsWithLogicalOperators(filter.getGroups(), userRequest)) {
+                return false;
             }
         }
         
@@ -76,21 +71,74 @@ public class FilterEvaluationService {
             return true;
         }
         
+        System.out.println("DEBUG: evaluateConditionsWithLogicalOperators - processing " + conditions.size() + " conditions");
+        
         // Start with the first condition result
         boolean result = evaluateCondition(conditions.get(0), userRequest);
+        System.out.println("DEBUG: First condition result: " + result);
+        
+        // Keep track of the last non-null operator to handle null operators correctly
+        // Initialize with the first condition's operator (this will be used for the second condition)
+        LogicalOperator lastOperator = conditions.get(0).getLogicalOperator();
+        if (lastOperator == null) {
+            lastOperator = LogicalOperator.AND; // Default if first condition has no operator
+        }
+        System.out.println("DEBUG: Initial lastOperator from first condition: " + lastOperator);
         
         // Process remaining conditions with their logical operators
         for (int i = 1; i < conditions.size(); i++) {
             FilterConditionDto condition = conditions.get(i);
             boolean conditionResult = evaluateCondition(condition, userRequest);
+            System.out.println("DEBUG: Condition " + i + " result: " + conditionResult + " (operator: " + condition.getLogicalOperator() + ")");
             
-            // Use the logical operator of the current condition to combine with previous result
+            // The logical operator of the current condition determines how it combines with the previous result
             LogicalOperator operator = condition.getLogicalOperator();
+            if (operator == null) {
+                // If current operator is null, use the last non-null operator we've seen
+                operator = lastOperator;
+                System.out.println("DEBUG: Using last seen operator: " + operator);
+            } else {
+                // Update last operator for future null operators
+                lastOperator = operator;
+                System.out.println("DEBUG: Updated lastOperator to: " + operator);
+            }
+            
             if (operator == LogicalOperator.OR) {
                 result = result || conditionResult;
+                System.out.println("DEBUG: Applied OR: " + result);
+            } else {
+                result = result && conditionResult;
+                System.out.println("DEBUG: Applied AND: " + result);
+            }
+        }
+        
+        System.out.println("DEBUG: Final evaluateConditionsWithLogicalOperators result: " + result);
+        return result;
+    }
+    
+    /**
+     * Evaluate groups with their individual logical operators
+     */
+    private boolean evaluateGroupsWithLogicalOperators(List<FilterGroupDto> groups, UserRequestDto userRequest) {
+        if (groups == null || groups.isEmpty()) {
+            return true;
+        }
+        
+        // Start with the first group result
+        boolean result = evaluateGroupConditions(groups.get(0).getConditions(), userRequest);
+        
+        // Process remaining groups with their logical operators
+        for (int i = 1; i < groups.size(); i++) {
+            FilterGroupDto group = groups.get(i);
+            boolean groupResult = evaluateGroupConditions(group.getConditions(), userRequest);
+            
+            // Use the logical operator of the current group to combine with previous result
+            LogicalOperator operator = group.getLogicalOperator();
+            if (operator == LogicalOperator.OR) {
+                result = result || groupResult;
             } else {
                 // Default to AND if operator is null or AND
-                result = result && conditionResult;
+                result = result && groupResult;
             }
         }
         
@@ -98,30 +146,23 @@ public class FilterEvaluationService {
     }
     
     /**
-     * Evaluate group conditions with logical operator
+     * Evaluate conditions within a group using their individual logical operators
      */
-    private boolean evaluateGroupConditions(List<FilterConditionDto> conditions, LogicalOperator operator, UserRequestDto userRequest) {
+    private boolean evaluateGroupConditions(List<FilterConditionDto> conditions, UserRequestDto userRequest) {
         if (conditions == null || conditions.isEmpty()) {
             return true;
         }
         
-        if (operator == LogicalOperator.OR) {
-            // At least one condition must be true
-            for (FilterConditionDto condition : conditions) {
-                if (evaluateCondition(condition, userRequest)) {
-                    return true;
-                }
-            }
-            return false;
-        } else {
-            // Default AND logic - all conditions must be true
-            for (FilterConditionDto condition : conditions) {
-                if (!evaluateCondition(condition, userRequest)) {
-                    return false;
-                }
-            }
-            return true;
+        System.out.println("DEBUG: evaluateGroupConditions - conditions count: " + conditions.size());
+        for (int i = 0; i < conditions.size(); i++) {
+            FilterConditionDto condition = conditions.get(i);
+            System.out.println("DEBUG: Condition " + i + ": " + condition.getFieldType() + " " + condition.getOperator() + " '" + condition.getFieldValue() + "' logicalOp=" + condition.getLogicalOperator());
         }
+        
+        // Evaluate conditions within the group using their individual logical operators
+        boolean result = evaluateConditionsWithLogicalOperators(conditions, userRequest);
+        System.out.println("DEBUG: evaluateGroupConditions result: " + result);
+        return result;
     }
     
     /**
@@ -131,6 +172,9 @@ public class FilterEvaluationService {
         String fieldValue = userRequest.getFieldValue(condition.getFieldType().name());
         String conditionValue = condition.getFieldValue();
         FilterOperator operator = condition.getOperator();
+        
+        System.out.println("DEBUG: evaluateCondition - " + condition.getFieldType() + " " + operator + " '" + conditionValue + "'");
+        System.out.println("DEBUG: User field value: '" + fieldValue + "'");
         
         // Special handling for distribution group files
         if (condition.getFieldType() == FilterFieldType.DISTRIBUTION_GROUPS_FILE) {

@@ -53,32 +53,32 @@ public class MarketingTargetFilterService {
         
         // Save conditions
         if (filterDto.getConditions() != null) {
-            for (int i = 0; i < filterDto.getConditions().size(); i++) {
-                FilterConditionDto conditionDto = filterDto.getConditions().get(i);
+            for (FilterConditionDto conditionDto : filterDto.getConditions()) {
                 MarketingTargetFilterCondition condition = convertConditionToEntity(conditionDto);
                 condition.setMarketingTargetFilterId(filter.getId());
-                condition.setOrderIndex(i);
+                // Use orderIndex from DTO, not loop index
+                condition.setOrderIndex(conditionDto.getOrderIndex() != null ? conditionDto.getOrderIndex() : 0);
                 conditionRepository.save(condition);
             }
         }
         
         // Save groups
         if (filterDto.getGroups() != null) {
-            for (int i = 0; i < filterDto.getGroups().size(); i++) {
-                FilterGroupDto groupDto = filterDto.getGroups().get(i);
+            for (FilterGroupDto groupDto : filterDto.getGroups()) {
                 MarketingTargetFilterGroup group = convertGroupToEntity(groupDto);
                 group.setMarketingTargetFilterId(filter.getId());
-                group.setOrderIndex(i);
+                // Use orderIndex from DTO, not loop index
+                group.setOrderIndex(groupDto.getOrderIndex() != null ? groupDto.getOrderIndex() : 0);
                 group = groupRepository.save(group);
                 
                 // Save group conditions
                 if (groupDto.getConditions() != null) {
-                    for (int j = 0; j < groupDto.getConditions().size(); j++) {
-                        FilterConditionDto conditionDto = groupDto.getConditions().get(j);
+                    for (FilterConditionDto conditionDto : groupDto.getConditions()) {
                         MarketingTargetFilterCondition condition = convertConditionToEntity(conditionDto);
                         condition.setMarketingTargetFilterId(filter.getId());
                         condition.setGroupId(group.getId());
-                        condition.setOrderIndex(j);
+                        // Use orderIndex from DTO, not loop index
+                        condition.setOrderIndex(conditionDto.getOrderIndex() != null ? conditionDto.getOrderIndex() : 0);
                         conditionRepository.save(condition);
                     }
                 }
@@ -111,32 +111,32 @@ public class MarketingTargetFilterService {
         
         // Save new conditions
         if (filterDto.getConditions() != null) {
-            for (int i = 0; i < filterDto.getConditions().size(); i++) {
-                FilterConditionDto conditionDto = filterDto.getConditions().get(i);
+            for (FilterConditionDto conditionDto : filterDto.getConditions()) {
                 MarketingTargetFilterCondition condition = convertConditionToEntity(conditionDto);
                 condition.setMarketingTargetFilterId(filter.getId());
-                condition.setOrderIndex(i);
+                // Use orderIndex from DTO, not loop index
+                condition.setOrderIndex(conditionDto.getOrderIndex() != null ? conditionDto.getOrderIndex() : 0);
                 conditionRepository.save(condition);
             }
         }
         
         // Save new groups
         if (filterDto.getGroups() != null) {
-            for (int i = 0; i < filterDto.getGroups().size(); i++) {
-                FilterGroupDto groupDto = filterDto.getGroups().get(i);
+            for (FilterGroupDto groupDto : filterDto.getGroups()) {
                 MarketingTargetFilterGroup group = convertGroupToEntity(groupDto);
                 group.setMarketingTargetFilterId(filter.getId());
-                group.setOrderIndex(i);
+                // Use orderIndex from DTO, not loop index
+                group.setOrderIndex(groupDto.getOrderIndex() != null ? groupDto.getOrderIndex() : 0);
                 group = groupRepository.save(group);
                 
                 // Save group conditions
                 if (groupDto.getConditions() != null) {
-                    for (int j = 0; j < groupDto.getConditions().size(); j++) {
-                        FilterConditionDto conditionDto = groupDto.getConditions().get(j);
+                    for (FilterConditionDto conditionDto : groupDto.getConditions()) {
                         MarketingTargetFilterCondition condition = convertConditionToEntity(conditionDto);
                         condition.setMarketingTargetFilterId(filter.getId());
                         condition.setGroupId(group.getId());
-                        condition.setOrderIndex(j);
+                        // Use orderIndex from DTO, not loop index
+                        condition.setOrderIndex(conditionDto.getOrderIndex() != null ? conditionDto.getOrderIndex() : 0);
                         conditionRepository.save(condition);
                     }
                 }
