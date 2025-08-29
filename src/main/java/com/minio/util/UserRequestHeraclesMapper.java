@@ -5,15 +5,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Mapper for converting UserRequestDto to flat Map structure (Heracles) and back
+ * Mapper for converting UserRequestDto to Heracles object and back
  */
 public class UserRequestHeraclesMapper {
     
     /**
-     * Pack UserRequestDto into flat Map structure
+     * Pack UserRequestDto into Heracles object
      */
-    public static Map<String, String> toHeracles(UserRequestDto userRequest) {
-        Map<String, String> heracles = new HashMap<>();
+    public static Heracles toHeracles(UserRequestDto userRequest) {
+        Heracles heracles = new Heracles();
         
         if (userRequest == null) {
             return heracles;
@@ -45,7 +45,7 @@ public class UserRequestHeraclesMapper {
         // Custom fields
         if (userRequest.getCustomFields() != null) {
             for (Map.Entry<String, String> entry : userRequest.getCustomFields().entrySet()) {
-                heracles.put("custom_" + entry.getKey(), entry.getValue());
+                heracles.setValue("custom_" + entry.getKey(), entry.getValue());
             }
         }
         
@@ -53,9 +53,9 @@ public class UserRequestHeraclesMapper {
     }
     
     /**
-     * Unpack from flat Map structure to UserRequestDto
+     * Unpack from Heracles object to UserRequestDto
      */
-    public static UserRequestDto fromHeracles(Map<String, String> heracles) {
+    public static UserRequestDto fromHeracles(Heracles heracles) {
         UserRequestDto userRequest = new UserRequestDto();
         
         if (heracles == null || heracles.isEmpty()) {
@@ -63,31 +63,31 @@ public class UserRequestHeraclesMapper {
         }
         
         // Main fields
-        userRequest.setSmid(heracles.get("smid"));
-        userRequest.setCountry(heracles.get("country"));
-        userRequest.setOperatingSystem(heracles.get("operatingSystem"));
-        userRequest.setClientVersion(heracles.get("clientVersion"));
-        userRequest.setBrowser(heracles.get("browser"));
-        userRequest.setBrowserVersion(heracles.get("browserVersion"));
-        userRequest.setDeviceType(heracles.get("deviceType"));
-        userRequest.setLanguage(heracles.get("language"));
-        userRequest.setTimezone(heracles.get("timezone"));
-        userRequest.setUserAgent(heracles.get("userAgent"));
-        userRequest.setIpAddress(heracles.get("ipAddress"));
-        userRequest.setSessionId(heracles.get("sessionId"));
-        userRequest.setUserId(heracles.get("userId"));
-        userRequest.setDeviceId(heracles.get("deviceId"));
-        userRequest.setAppVersion(heracles.get("appVersion"));
-        userRequest.setPlatform(heracles.get("platform"));
-        userRequest.setCarrier(heracles.get("carrier"));
-        userRequest.setNetworkType(heracles.get("networkType"));
-        userRequest.setScreenResolution(heracles.get("screenResolution"));
-        userRequest.setDeviceModel(heracles.get("deviceModel"));
-        userRequest.setOsVersion(heracles.get("osVersion"));
+        userRequest.setSmid(heracles.getValue("smid"));
+        userRequest.setCountry(heracles.getValue("country"));
+        userRequest.setOperatingSystem(heracles.getValue("operatingSystem"));
+        userRequest.setClientVersion(heracles.getValue("clientVersion"));
+        userRequest.setBrowser(heracles.getValue("browser"));
+        userRequest.setBrowserVersion(heracles.getValue("browserVersion"));
+        userRequest.setDeviceType(heracles.getValue("deviceType"));
+        userRequest.setLanguage(heracles.getValue("language"));
+        userRequest.setTimezone(heracles.getValue("timezone"));
+        userRequest.setUserAgent(heracles.getValue("userAgent"));
+        userRequest.setIpAddress(heracles.getValue("ipAddress"));
+        userRequest.setSessionId(heracles.getValue("sessionId"));
+        userRequest.setUserId(heracles.getValue("userId"));
+        userRequest.setDeviceId(heracles.getValue("deviceId"));
+        userRequest.setAppVersion(heracles.getValue("appVersion"));
+        userRequest.setPlatform(heracles.getValue("platform"));
+        userRequest.setCarrier(heracles.getValue("carrier"));
+        userRequest.setNetworkType(heracles.getValue("networkType"));
+        userRequest.setScreenResolution(heracles.getValue("screenResolution"));
+        userRequest.setDeviceModel(heracles.getValue("deviceModel"));
+        userRequest.setOsVersion(heracles.getValue("osVersion"));
         
         // Custom fields
         Map<String, String> customFields = new HashMap<>();
-        for (Map.Entry<String, String> entry : heracles.entrySet()) {
+        for (Map.Entry<String, String> entry : heracles.getData().entrySet()) {
             if (entry.getKey().startsWith("custom_")) {
                 String customKey = entry.getKey().substring("custom_".length());
                 customFields.put(customKey, entry.getValue());
@@ -102,11 +102,11 @@ public class UserRequestHeraclesMapper {
     }
     
     /**
-     * Helper method to add value to Map only if it's not null
+     * Helper method to add value to Heracles only if it's not null
      */
-    private static void putIfNotNull(Map<String, String> map, String key, String value) {
+    private static void putIfNotNull(Heracles heracles, String key, String value) {
         if (value != null) {
-            map.put(key, value);
+            heracles.setValue(key, value);
         }
     }
 }

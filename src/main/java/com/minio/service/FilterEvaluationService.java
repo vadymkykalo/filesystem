@@ -222,22 +222,10 @@ public class FilterEvaluationService {
                 return compareNumeric(fieldValue, conditionValue) <= 0;
                 
             case IN:
-                String[] values = conditionValue.split(",");
-                for (String value : values) {
-                    if (fieldValue.equals(value.trim())) {
-                        return true;
-                    }
-                }
-                return false;
+                return evaluateInOperator(fieldValue, conditionValue, true);
                 
             case NOT_IN:
-                String[] notValues = conditionValue.split(",");
-                for (String value : notValues) {
-                    if (fieldValue.equals(value.trim())) {
-                        return false;
-                    }
-                }
-                return true;
+                return evaluateInOperator(fieldValue, conditionValue, false);
                 
             case REGEX:
                 try {
@@ -256,6 +244,51 @@ public class FilterEvaluationService {
             default:
                 return false;
         }
+    }
+    
+    /**
+     * Evaluate IN/NOT_IN operators with support for JSON arrays and comma-separated values
+     */
+    private boolean evaluateInOperator(String fieldValue, String conditionValue, boolean isInOperator) {
+        System.out.println("DEBUG: evaluateInOperator - fieldValue: '" + fieldValue + "', conditionValue: '" + conditionValue + "', isInOperator: " + isInOperator);
+        
+        String[] values;
+        
+        // Check if conditionValue is a JSON array
+        if (conditionValue.trim().startsWith("[") && conditionValue.trim().endsWith("]")) {
+            // Parse JSON array
+            String arrayContent = conditionValue.trim().substring(1, conditionValue.trim().length() - 1);
+            System.out.println("DEBUG: Detected JSON array, content: '" + arrayContent + "'");
+            
+            // Split by comma and clean up quotes
+            values = arrayContent.split(",");
+            for (int i = 0; i < values.length; i++) {
+                values[i] = values[i].trim();
+                // Remove surrounding quotes if present
+                if (values[i].startsWith("\"") && values[i].endsWith("\"")) {
+                    values[i] = values[i].substring(1, values[i].length() - 1);
+                }
+                System.out.println("DEBUG: Parsed value " + i + ": '" + values[i] + "'");
+            }
+        } else {
+            // Regular comma-separated values
+            values = conditionValue.split(",");
+            for (int i = 0; i < values.length; i++) {
+                values[i] = values[i].trim();
+                System.out.println("DEBUG: Regular value " + i + ": '" + values[i] + "'");
+            }
+        }
+        
+        // Check if fieldValue matches any of the values
+        for (String value : values) {
+            if (fieldValue.equals(value)) {
+                System.out.println("DEBUG: Match found: '" + fieldValue + "' equals '" + value + "'");
+                return isInOperator; // true for IN, false for NOT_IN when match found
+            }
+        }
+        
+        System.out.println("DEBUG: No match found for '" + fieldValue + "'");
+        return !isInOperator; // false for IN, true for NOT_IN when no match found
     }
     
     /**

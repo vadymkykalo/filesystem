@@ -3,7 +3,7 @@ package com.minio.executor;
 import com.minio.dto.UserRequestDto;
 import com.minio.service.FilterEvaluationService;
 import com.minio.util.UserRequestHeraclesMapper;
-import java.util.Map;
+import com.minio.util.Heracles;
 
 /**
  * Executor for filter evaluation
@@ -12,9 +12,9 @@ public class EvaluateFilterExecutor extends AWSExecutor<Boolean> {
 
     private final FilterEvaluationService evaluationService;
     private final Long filterId;
-    private final Map<String, String> heraclesData;
+    private final Heracles heraclesData;
 
-    public EvaluateFilterExecutor(FilterEvaluationService evaluationService, Long filterId, Map<String, String> heraclesData) {
+    public EvaluateFilterExecutor(FilterEvaluationService evaluationService, Long filterId, Heracles heraclesData) {
         this.evaluationService = evaluationService;
         this.filterId = filterId;
         this.heraclesData = heraclesData;

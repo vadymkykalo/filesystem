@@ -9,6 +9,7 @@ import com.minio.model.LogicalOperator;
 import com.minio.service.MarketingTargetFilterService;
 import com.minio.service.FilterEvaluationService;
 import com.minio.util.UserRequestHeraclesMapper;
+import com.minio.util.Heracles;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -240,7 +241,7 @@ public class SalesToolsRestController {
     public Response evaluateFilter(@PathParam("id") Long filterId, UserRequestDto userRequest) {
         try {
             // Pack UserRequestDto into Heracles for passing through executor
-            Map<String, String> heraclesData = UserRequestHeraclesMapper.toHeracles(userRequest);
+            Heracles heraclesData = UserRequestHeraclesMapper.toHeracles(userRequest);
             boolean matches = new EvaluateFilterExecutor(evaluationService, filterId, heraclesData).execute();
             return Response.ok()
                 .entity("{\"filterId\": " + filterId + ", \"matches\": " + matches + "}")

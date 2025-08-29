@@ -514,14 +514,55 @@ AND, OR
 }
 ```
 
+### 16. Хочу користувачів які НЕ в файлі розподільчих груп
+```json
+{
+  "filterName": "Не в розподільчих групах",
+  "marketingTargetId": 1,
+  "isActive": true,
+  "conditions": [
+    {
+      "fieldType": "DISTRIBUTION_GROUPS_FILE",
+      "operator": "NOT_IN",
+      "fieldValue": "5",
+      "logicalOperator": null,
+      "orderIndex": 0
+    }
+  ],
+  "groups": []
+}
+```
+**Примітка:** `fieldValue` містить ID MarketingTarget (наприклад "5"), який посилається на файл з SMID списком для виключення.
+
+### 17. Хочу тільки користувачів з файлу VIP списку
+```json
+{
+  "filterName": "Тільки VIP з файлу",
+  "marketingTargetId": 1,
+  "isActive": true,
+  "conditions": [
+    {
+      "fieldType": "DISTRIBUTION_GROUPS_FILE",
+      "operator": "IN",
+      "fieldValue": "3",
+      "logicalOperator": null,
+      "orderIndex": 0
+    }
+  ],
+  "groups": []
+}
+```
+**Примітка:** `fieldValue` містить ID MarketingTarget (наприклад "3"), який посилається на файл з VIP SMID списком.
+
 ## Важливі правила
 
 1. **logicalOperator = null** тільки для першої умови в root або в групі
 2. **logicalOperator для груп** завжди вказувати (навіть для першої групи використовувати `"AND"`)⚠️
 3. **orderIndex** обов'язковий і починається з 0
 4. **fieldValue** для IN/NOT_IN як JSON масив: `"[\"val1\",\"val2\"]"`
-5. **Групи** для складної логіки типу (A OR B) AND (C OR D)
-6. **Root умови** виконуються першими, потім групи
+5. **fieldValue** для DISTRIBUTION_GROUPS_FILE як ID MarketingTarget: `"3"` (не назва файлу!)
+6. **Групи** для складної логіки типу (A OR B) AND (C OR D)
+7. **Root умови** виконуються першими, потім групи
 
 ⚠️ **Примітка:** Валідація API вимагає обов'язкове вказання `logicalOperator` для всіх груп. Навіть якщо група перша, використовуйте `"logicalOperator": "AND"` замість `null`.
 
@@ -603,4 +644,186 @@ GROUP1: (smid = "123" OR smid = "456")        → true/false
 GROUP2: (os Co "Android" OR os Co "iOS")      → true/false
 
 ФІНАЛЬНИЙ РЕЗУЛЬТАТ: ROOT AND GROUP1 AND GROUP2
+```
+
+## Тестування Фільтрів
+
+### API для оцінки фільтрів
+```
+POST /api/marketing-target-filters/evaluate/{filterId}  - Оцінити фільтр по ID
+POST /api/marketing-target-filters/evaluate            - Оцінити переданий фільтр
+```
+
+### UserRequestDto - параметри користувача для тестування
+
+**Основні поля:**
+```json
+{
+  "smid": "3586067540",
+  "country": "UA",
+  "operatingSystem": "Android 12",
+  "clientVersion": "2.2.2",
+  "browser": "Chrome",
+  "browserVersion": "91.0.4472.124",
+  "deviceType": "mobile",
+  "language": "uk",
+  "timezone": "Europe/Kiev",
+  "userAgent": "Mozilla/5.0...",
+  "ipAddress": "192.168.1.1",
+  "sessionId": "sess_123456",
+  "userId": "user_789",
+  "deviceId": "device_abc",
+  "appVersion": "1.0.0",
+  "platform": "Android",
+  "carrier": "Kyivstar",
+  "networkType": "WiFi",
+  "screenResolution": "1920x1080",
+  "deviceModel": "Samsung Galaxy S21",
+  "osVersion": "12.0",
+  "customFields": {
+    "customParam1": "value1",
+    "customParam2": "value2"
+  }
+}
+```
+
+### Приклади тестування
+
+#### 1. Тестування фільтра по ID
+```bash
+curl -X POST "http://localhost:8080/api/marketing-target-filters/evaluate/1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "smid": "3586067540",
+    "country": "UA",
+    "clientVersion": "2.2.2",
+    "operatingSystem": "Android 12"
+  }'
+```
+
+**Відповідь:**
+```json
+{
+  "matches": true,
+  "filterId": 1,
+  "filterName": "Україна + версія 2.2.2+"
+}
+```
+
+#### 2. Тестування з переданим фільтром
+```bash
+curl -X POST "http://localhost:8080/api/marketing-target-filters/evaluate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "filter": {
+      "filterName": "Тест фільтр",
+      "conditions": [
+        {
+          "fieldType": "COUNTRY",
+          "operator": "EQUAL",
+          "fieldValue": "UA",
+          "logicalOperator": null,
+          "orderIndex": 0
+        }
+      ],
+      "groups": []
+    },
+    "userRequest": {
+      "smid": "3586067540",
+      "country": "UA",
+      "clientVersion": "2.2.2"
+    }
+  }'
+```
+
+#### 3. Тестування складного фільтра з групами
+```bash
+curl -X POST "http://localhost:8080/api/marketing-target-filters/evaluate/5" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "smid": "3586067540",
+    "country": "UA",
+    "operatingSystem": "Android 12",
+    "clientVersion": "2.2.2",
+    "browser": "Chrome",
+    "networkType": "WiFi"
+  }'
+```
+
+#### 4. Тестування з файлом розподільчих груп
+```bash
+curl -X POST "http://localhost:8080/api/marketing-target-filters/evaluate/10" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "smid": "3586067540",
+    "country": "UA"
+  }'
+```
+
+### Мінімальні параметри для тестування
+
+**Для базового тестування достатньо:**
+```json
+{
+  "smid": "3586067540",
+  "country": "UA",
+  "clientVersion": "2.2.2",
+  "operatingSystem": "Android 12"
+}
+```
+
+**Для тестування браузерів:**
+```json
+{
+  "smid": "3586067540",
+  "browser": "Chrome",
+  "browserVersion": "91.0.4472.124"
+}
+```
+
+**Для тестування мережі:**
+```json
+{
+  "smid": "3586067540",
+  "networkType": "WiFi",
+  "carrier": "Kyivstar"
+}
+```
+
+### Поширені тест-кейси
+
+1. **Позитивний тест:** Користувач відповідає всім умовам фільтра
+2. **Негативний тест:** Користувач не відповідає жодній умові
+3. **Частковий тест:** Користувач відповідає частині умов (для OR логіки)
+4. **Граничні значення:** Тестування GREATER_THAN, LESS_THAN операторів
+5. **Null значення:** Тестування IS_NULL, IS_NOT_NULL операторів
+6. **Списки:** Тестування IN, NOT_IN операторів
+7. **Файли:** Тестування DISTRIBUTION_GROUPS_FILE з реальними файлами
+
+### Відповіді API
+
+**Успішна оцінка:**
+```json
+{
+  "matches": true,
+  "filterId": 1,
+  "filterName": "Назва фільтра"
+}
+```
+
+**Фільтр не підходить:**
+```json
+{
+  "matches": false,
+  "filterId": 1,
+  "filterName": "Назва фільтра"
+}
+```
+
+**Помилка:**
+```json
+{
+  "error": "Filter not found",
+  "filterId": 999
+}
 ```
