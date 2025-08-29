@@ -8,6 +8,7 @@ import com.minio.model.FilterOperator;
 import com.minio.model.LogicalOperator;
 import com.minio.service.MarketingTargetFilterService;
 import com.minio.service.FilterEvaluationService;
+import com.minio.util.UserRequestHeraclesMapper;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -15,6 +16,7 @@ import jakarta.ws.rs.core.Response;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.Map;
 
 @Path(UrlAgreements.PATH_SALES_TOOLS)
 @Produces(MediaType.APPLICATION_JSON)
@@ -237,7 +239,9 @@ public class SalesToolsRestController {
     @Path(UrlAgreements.PATH_SALES_TOOLS_FILTERS_EVALUATE + UrlAgreements.OPERATION_ID_PARAM)
     public Response evaluateFilter(@PathParam("id") Long filterId, UserRequestDto userRequest) {
         try {
-            boolean matches = new EvaluateFilterExecutor(evaluationService, filterId, userRequest).execute();
+            // Pack UserRequestDto into Heracles for passing through executor
+            Map<String, String> heraclesData = UserRequestHeraclesMapper.toHeracles(userRequest);
+            boolean matches = new EvaluateFilterExecutor(evaluationService, filterId, heraclesData).execute();
             return Response.ok()
                 .entity("{\"filterId\": " + filterId + ", \"matches\": " + matches + "}")
                 .build();

@@ -3,7 +3,7 @@ package com.minio.executor;
 import com.minio.service.MarketingTargetFilterService;
 
 /**
- * Экзекютор для удаления фильтра
+ * Executor for filter deletion
  */
 public class DeleteFilterExecutor extends AWSExecutor<Void> {
 

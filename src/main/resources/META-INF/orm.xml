@@ -7,6 +7,19 @@
 
 
 
+    <!-- MarketingTarget queries -->
+    <named-query name="MarketingTarget.findAll">
+        <query>
+            SELECT t FROM MarketingTarget t ORDER BY t.id
+        </query>
+    </named-query>
+
+    <named-query name="MarketingTarget.countById">
+        <query>
+            SELECT COUNT(t) FROM MarketingTarget t WHERE t.id = :id
+        </query>
+    </named-query>
+
     <!-- MarketingTargetFilter queries -->
     <named-query name="MarketingTargetFilter.findAll">
         <query>

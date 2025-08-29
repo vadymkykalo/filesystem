@@ -7,6 +7,7 @@ import com.minio.model.*;
 import com.minio.repository.MarketingTargetFilterRepository;
 import com.minio.repository.MarketingTargetFilterConditionRepository;
 import com.minio.repository.MarketingTargetFilterGroupRepository;
+import com.minio.repository.MarketingTargetRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -25,6 +26,9 @@ public class MarketingTargetFilterService {
     
     @Inject
     MarketingTargetFilterGroupRepository groupRepository;
+    
+    @Inject
+    MarketingTargetRepository marketingTargetRepository;
     
     public List<MarketingTargetFilterDto> getAllFilters() {
         return filterRepository.findAll().stream()
@@ -148,9 +152,24 @@ public class MarketingTargetFilterService {
     
     @Transactional
     public void deleteFilter(Long id) {
-        conditionRepository.deleteByFilterId(id);
-        groupRepository.deleteByFilterId(id);
-        filterRepository.deleteById(id);
+        // Get filter to obtain marketingTargetId before deletion
+        Optional<MarketingTargetFilter> filterOpt = filterRepository.findById(id);
+        if (filterOpt.isPresent()) {
+            MarketingTargetFilter filter = filterOpt.get();
+            Long marketingTargetId = filter.getMarketingTargetId();
+            
+            // Delete filter conditions and groups
+            conditionRepository.deleteByFilterId(id);
+            groupRepository.deleteByFilterId(id);
+            
+            // Delete the filter itself
+            filterRepository.deleteById(id);
+            
+            // Delete associated MarketingTarget
+            if (marketingTargetId != null) {
+                marketingTargetRepository.deleteById(marketingTargetId);
+            }
+        }
     }
     
     private void validateFilterName(String filterName, Long excludeId) {
